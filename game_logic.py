@@ -19,15 +19,11 @@ class GameLogic:
 
     def is_valid_move(self, r, c):
         return (0 <= r < self.rows) and (0 <= c < self.cols) and ((r, c) not in self.board) and not self.game_over
-
-    # --- ĐÂY LÀ HÀM CẦN SỬA ---
     def make_move(self, r, c):
         if not self.is_valid_move(r, c): return None
-        
-        # [SỬA LỖI]: Lưu lại người vừa đánh trước khi đổi lượt
+
         player_moved = self.current_player 
         
-        # Ghi nhận nước đi
         self.board[(r, c)] = player_moved
         
         # Kiểm tra thắng thua
@@ -41,8 +37,8 @@ class GameLogic:
             # Đổi lượt cho người tiếp theo
             self.current_player = "O" if self.current_player == "X" else "X"
         
-        # [QUAN TRỌNG]: Trả về người VỪA ĐÁNH (player_moved) 
-        # thay vì người chơi tiếp theo (self.current_player)
+        #Trả về người VỪA ĐÁNH 
+        # thay vì người chơi tiếp theo 
         return player_moved 
     # --------------------------
 
@@ -60,8 +56,6 @@ class GameLogic:
             if count >= self.streak_to_win: return True
         return False
 
-    # ... (Giữ nguyên phần Minimax AI bên dưới không đổi) ...
-    
     def get_ai_move(self):
         possible_moves = self.generate_moves()
         if not possible_moves: return (self.rows // 2, self.cols // 2)
