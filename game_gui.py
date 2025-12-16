@@ -9,34 +9,29 @@ class GameApp:
         self.root.geometry("1100x750")
         self.root.configure(bg="#2c3e50")
         
-        # Mặc định
         self.game = logic.GameLogic(3, 3, 3)
         self.cell_size = 60
-        self.ai_symbol = "O"   # Quân của máy
-        self.user_symbol = "X" # Quân của người
+        self.ai_symbol = "O"   
+        self.user_symbol = "X" 
         
         self._setup_ui()
 
     def _setup_ui(self):
-        # === SIDEBAR (CẤU HÌNH) ===
         sidebar = tk.Frame(self.root, bg="white", padx=20, pady=20, width=320)
         sidebar.pack(side=tk.LEFT, fill=tk.Y)
         sidebar.pack_propagate(False)
 
         tk.Label(sidebar, text="CẤU HÌNH GAME", font=("Segoe UI", 16, "bold"), bg="white", fg="#2c3e50").pack(pady=(0, 20))
 
-        # 1. Kích thước
         self.entry_rows = self.create_input(sidebar, "Số Dòng:", "3")
         self.entry_cols = self.create_input(sidebar, "Số Cột:", "3")
         self.entry_streak = self.create_input(sidebar, "Số thắng (Streak):", "3")
-        
-        # 2. Chọn Chế độ
+  
         tk.Label(sidebar, text="Chế độ chơi:", bg="white", font=("Segoe UI", 10, "bold")).pack(anchor="w", pady=(10, 0))
         self.combo_mode = ttk.Combobox(sidebar, values=["Người vs Người", "Người vs Máy (AI)"], state="readonly")
         self.combo_mode.current(1)
         self.combo_mode.pack(fill=tk.X, pady=(0, 10))
 
-        # 3. Chọn Quân (X/O)
         tk.Label(sidebar, text="Bạn chọn quân:", bg="white", font=("Segoe UI", 10, "bold")).pack(anchor="w")
         self.combo_symbol = ttk.Combobox(sidebar, values=["X", "O"], state="readonly")
         self.combo_symbol.current(0) # Mặc định chọn X
@@ -60,7 +55,6 @@ class GameApp:
         self.lbl_status = tk.Label(sidebar, text="Sẵn sàng", font=("Arial", 11, "italic"), bg="white", fg="blue")
         self.lbl_status.pack()
 
-        # === MAIN BOARD (CANVAS) ===
         wrapper = tk.Frame(self.root, bg="#34495e")
         wrapper.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=10, pady=10)
         
@@ -77,7 +71,6 @@ class GameApp:
 
     def start_game(self):
         try:
-            # 1. Lấy thông số
             r = int(self.entry_rows.get())
             c = int(self.entry_cols.get())
             s = int(self.entry_streak.get())
@@ -85,28 +78,22 @@ class GameApp:
                 messagebox.showwarning("Lỗi", "Số thắng tối thiểu phải là 3!")
                 return
 
-            # 2. Khởi tạo Logic
             self.game = logic.GameLogic(r, c, s)
-            
-            # 3. Thiết lập Chế độ & Phe
+
             mode = self.combo_mode.get()
             self.game.ai_mode = (mode == "Người vs Máy (AI)")
-            
-            # Xác định ai là X, ai là O
+ 
             user_choice = self.combo_symbol.get()
             order_choice = self.combo_order.get()
             
             self.user_symbol = user_choice
             self.ai_symbol = "O" if user_choice == "X" else "X"
-            
-            # Xác định ai đi trước
-            # Quy ước: Game luôn bắt đầu bằng quân được set vào current_player
+           
             if "Tôi đi trước" in order_choice:
                 self.game.current_player = self.user_symbol
             else:
                 self.game.current_player = self.ai_symbol
 
-            # 4. Tự động điều chỉnh giao diện
             if r > 15 or c > 15: self.cell_size = 30
             elif r > 10 or c > 10: self.cell_size = 40
             else: self.cell_size = 60
@@ -114,9 +101,8 @@ class GameApp:
             self.draw_board()
             self.update_ui_state()
 
-            # 5. [QUAN TRỌNG] Nếu Máy đi trước -> Gọi AI đánh ngay lập tức
             if self.game.ai_mode and self.game.current_player == self.ai_symbol:
-                self.root.after(500, self.ai_turn) # Đợi 0.5s rồi đánh
+                self.root.after(500, self.ai_turn)
 
         except ValueError:
             messagebox.showerror("Lỗi", "Vui lòng nhập số nguyên hợp lệ!")
@@ -167,11 +153,9 @@ class GameApp:
                 self.root.after(100, self.ai_turn)
 
     def ai_turn(self):
-        # Hiển thị trạng thái đang nghĩ
         self.lbl_status.config(text=f"AI ({self.ai_symbol}) đang tính toán...", fg="red")
         self.root.update()
         
-        # AI tìm nước đi
         move = self.game.get_ai_move()
         if move:
             self.handle_move(move[0], move[1])
